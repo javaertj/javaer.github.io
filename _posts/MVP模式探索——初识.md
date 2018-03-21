@@ -1,0 +1,170 @@
+---
+layout:     post
+title:      ReactiveCocoa 进阶
+subtitle:   函数式编程框架 ReactiveCocoa 进阶
+date:       2017-01-06
+author:     BY
+catalog: true
+tags:
+    - iOS
+    - ReactiveCocoa
+    - 函数式编程
+    - 开源框架
+---
+
+# 前言
+
+犹豫了很久，还是决定静下心来写一写自己实践的MVP模式相关的内容，我怕我再不写，就要丢失了那些采坑的记忆，就要丢失了写博客的习惯，最可怕的是，再不写，可能就帮不了那些真正想要了解和使用MVP的童鞋们了。
+
+我知道有很多很多关于MVP的文章，甚至还有很多很多不同的MVP扩展，看我依然觉得我要继续写下去，因为我坚定地认为，我也可以有别具一格的MVP。
+
+这个系列大概有三个部分：
+
+
+  >[了解MVP和原始MVP的使用](http://blog.csdn.net/yankebin/article/details/79571655)
+  
+  >[TheMVP在项目中的尝试和扩展](http://blog.csdn.net/yankebin/article/details/79628174)
+  
+  >TODO-MVP在项目中的尝试和扩展
+
+如果我的这篇文章是你第一次接触MVP的文章的话，那么，我就不得不把前辈们的干货分享给你了，因为很多原理的解析都源于这些干货里
+
+>[Android开发者必看MVP实践，google官方出品](https://github.com/googlesamples/android-architecture?utm_source=tuicool)
+
+>[MVP的扩展实践，THEMVP](https://www.kymjs.com/code/2015/11/09/01/)
+
+干货在于精而不在于多，所以从现在开始，忘掉干货，让我们开始今天的主题吧。
+
+# 一.什么是MVP
+
+**1.1MVP的定义**
+
+MVP，全称 Model-View-Presenter。
+
+MVP（Model-View-Presenter，模型-视图-表示器）模式是由IBM开发出来的一个针对C++和Java的编程模型，大概出现于2000年，是MVC模式的一个变种，主要用来隔离UI、UI逻辑和业务逻辑、数据。也就是说，MVP 是从经典的模式MVC演变而来，它们的基本思想有相通的地方：Controller/Presenter负责逻辑的处理，Model提供数据，View负责显示。
+
+** 1.2为什么使用MVP **
+
+Kiss原则（Keep It Stupid Simple）
+
+说到MVP，那么就不得不提一提他的前辈——MVC。对于MVC模式，你可能早已烂熟于心，然而，我相信，很多程序员按照MVC模式写出来的程序大概是这个样子的：
+
+![这里写图片描述](https://upload-images.jianshu.io/upload_images/1233754-5f7d98f12dc2496d.png!web?imageMogr2/auto-orient/strip%7CimageView2/2/w/513)
+
+
+这张图片让你想到了什么？是不是自己写过千万遍的---->
+![这里写图片描述](https://upload-images.jianshu.io/upload_images/1233754-41f3e3d839c950fc.png!web?imageMogr2/auto-orient/strip%7CimageView2/2/w/550)
+
+**“所有的事物都被连接到一起”的替代品是一个万能对象(god object)。**
+**god object是十分复杂的，他的每一个部分都不能重复利用，无法轻易的测试、或者调试和重构。**
+
+但是我们把刚才的那张图片里的View-Data按照MVP模式重新整理过后
+![这里写图片描述](https://upload-images.jianshu.io/upload_images/1233754-eb5b4bc4fbf757be.png!web?imageMogr2/auto-orient/strip%7CimageView2/2/w/550)
+
+复杂的任务被分成细小的任务，并且很容易解决。越小的东西，bug越少，越容易debug，更好测试。在MVP模式下的View层将会变得简单，所以即便是他请求数据的时候也不需要回调函数。View逻辑变成十分直接——通过接口，告诉我你想要的样子，我便是你想要的样子。View和Data不在需要直接关联，不关联就意味着Data和View的重用性变得更高。
+
+后台任务
+
+当你编写一个Actviity、Fragment、自定义View的时候，你会把所有的和后台任务相关的方法写在一个静态类或者外部类中。这样，你的Task不再和Activity联系在一起，这既不会导致内存泄露，也不依赖于Activity的重建。
+
+这里有若干种方法处理后台任务，但是它们的可靠性都不及MVP。
+
+**1.3MVP的优缺点**
+
+任何事务都存在两面性，MVP当然也不列外，我们来看看MVP的优缺点。
+
+优点：
+
+1. 降低耦合度，实现了Model和View真正的完全分离，可以修改View而不影响Modle
+
+2. 模块职责划分明显，层次清晰
+
+3. 隐藏数据
+
+4. Presenter可以复用，一个Presenter可以用于多个View，而不需要更改Presenter的逻辑（当然是在View的改动不影响业务逻辑的前提下）
+
+5. 利于测试驱动开发。以前的Android开发是难以进行单元测试的（虽然很多Android开发者都没有写过测试用例，但是随着项目变得越来越复杂，没有测试是很难保证软件质量的；而且近几年来Android上的测试框架已经有了长足的发展——开始写测试用例吧），在使用MVP的项目中Presenter对View是通过接口进行，在对Presenter进行不依赖UI环境的单元测试的时候。可以通过Mock一个View对象，这个对象只需要实现了View的接口即可。然后依赖注入到Presenter中，单元测试的时候就可以完整的测试Presenter应用逻辑的正确性。
+
+6. View可以进行组件化。在MVP当中，View不依赖Model。这样就可以让View从特定的业务场景中脱离出来，可以说View可以做到对业务完全无知。它只需要提供一系列接口提供给上层操作。这样就可以做到高度可复用的View组件。
+
+7. 代码灵活性
+
+缺点：
+
+1. Presenter中除了应用逻辑以外，还有大量的View->Model，Model->View的手动同步逻辑，造成Presenter比较笨重，维护起来会比较困难。
+
+2. 由于对视图的渲染放在了Presenter中，所以视图和Presenter的交互会过于频繁。
+
+3. 如果Presenter过多地渲染了视图，往往会使得它与特定的视图的联系过于紧密。一旦视图需要变更，那么Presenter也需要变更了。
+
+4. 额外的代码复杂度及学习成本。
+
+**1.4小结**
+
+在MVP模式里通常包含4个要素：
+
+(1) View :负责绘制UI元素、与用户进行交互(在Android中体现为Activity);
+
+(2) View interface :需要View实现的接口，View通过View interface与Presenter进行交互，降低耦合，方便进行单元测试;
+
+(3) Model :负责存储、检索、操纵数据(有时也实现一个Model interface用来降低耦合);
+
+(4) Presenter :作为View与Model交互的中间纽带，处理与用户交互的负责逻辑。
+
+![这里写图片描述](https://upload-images.jianshu.io/upload_images/1233754-389a7d4f147c3857.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/550)
+
+
+# 二.MVP在Android项目里的基本使用
+
+正所谓：Talk is cheap,show me the code.下面会给出示例代码，请继续阅读。
+
+>[我所理解到的标准MVP模式在Android应用中的实现（github链接）](https://github.com/ykbjson/TestStandardMvp)
+
+项目的结构大致如下
+
+![这里写图片描述](https://img-blog.csdn.net/20180316110446630?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
+项目非常简单，只是做了一个模拟登录的业务场景，其中，LoginRepository里面的登录操作替换成实际的登录操作即可实现完整的一套业务逻辑了。
+
+**Model部分**
+
+ILoginModel
+
+![这里写图片描述](https://img-blog.csdn.net/20180316111121686?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
+主要是定义登录的操作接口，以及定义登录结果的回调接口，这个接口是给Presenter用的。实际的登录操作在LoginRepository里面。
+
+![这里写图片描述](https://img-blog.csdn.net/20180316111332909?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
+doLogin方法里的部分，模拟了一个假“登录”操作。
+
+
+**View部分**
+
+ILoginView
+![这里写图片描述](https://img-blog.csdn.net/20180316112923843?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
+非常简单，定义了显示dialog、显示登录成功、显示登录失败的几个方法，具体的实现可以是任意一个View（视图）、Fragment、Activity等等等等。我这里用的Activity去实现的View接口
+
+![这里写图片描述](https://img-blog.csdn.net/20180316113724244?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
+这里就不用我多说什么了吧，大家再熟悉不过的场景了。这里面处理了实际的dialog的显示，登录成功的显示和登录失败的显示。最重要的是`loginPresenter=new LoginPresenterImpl(this);`这里View就持有了Presenter的引用，可以操作Presenter的相关方法了。
+
+**Presenter部分**
+
+ILoginPresenter
+
+![这里写图片描述](https://img-blog.csdn.net/20180316111625565?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
+非常简单，定义登录的接口，但是这个接口是给View操作的。实际的实现在LoginPresenterImpl里面
+
+![这里写图片描述](https://img-blog.csdn.net/20180316111835100?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
+这里可以看到，当我们的Presenter构造好之后，他就同时持有了View和Model的引用。View和Model层完全互不可见，但是，从这一刻开始，View却能展示Model层拥有的数据，Model也能根据View的状态变化或指令更新自己的数据！！！！
+想象一下，如果哪一天用户模型User去掉了name字段，要求展示nickName字段，那你需要对你的View做任何改动吗？View是否变得可以复用了？
+
+
+其实说起来有点忧伤，因为工作环境的原因，我所阐述的MVP相关的知识都是自己在各个项目里不断尝试、改良之后总结出来的，身边也没有大牛可以指点我，引导我更好的去认识MVP理解MVP，并且创造更好的MVP。虽然我相信这个世界上没有最好的架构和设计模式，只有最适合的架构和设计模式，但是我更相信在适合的架构或模式里绝对还有更好的架构和设计模式。希望大家如果在闲暇之余看到了此文，能给我指点更好的学习路径和方式，感激不尽。
+  
+
+                                                               
