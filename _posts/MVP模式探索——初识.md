@@ -3,7 +3,7 @@ layout:     post
 title:      MVP模式探索——TheMVP的尝试和扩展
 subtitle:   MVP模式探索——TheMVP的尝试和扩展
 date:       2018-03-20
-author:     BY
+author:     YANKEBIN
 catalog: true
 tags:
      - Android
