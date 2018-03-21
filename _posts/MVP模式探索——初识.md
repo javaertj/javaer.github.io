@@ -1,15 +1,14 @@
 ---
 layout:     post
-title:      ReactiveCocoa 进阶
-subtitle:   函数式编程框架 ReactiveCocoa 进阶
-date:       2017-01-06
+title:      MVP模式探索——TheMVP的尝试和扩展
+subtitle:   MVP模式探索——TheMVP的尝试和扩展
+date:       2018-03-20
 author:     BY
 catalog: true
 tags:
-    - iOS
-    - ReactiveCocoa
-    - 函数式编程
-    - 开源框架
+     - Android
+     - MVP
+     - 设计模式
 ---
 
 # 前言
@@ -53,12 +52,14 @@ Kiss原则（Keep It Stupid Simple）
 
 
 这张图片让你想到了什么？是不是自己写过千万遍的---->
+
 ![这里写图片描述](https://upload-images.jianshu.io/upload_images/1233754-41f3e3d839c950fc.png!web?imageMogr2/auto-orient/strip%7CimageView2/2/w/550)
 
 **“所有的事物都被连接到一起”的替代品是一个万能对象(god object)。**
 **god object是十分复杂的，他的每一个部分都不能重复利用，无法轻易的测试、或者调试和重构。**
 
 但是我们把刚才的那张图片里的View-Data按照MVP模式重新整理过后
+
 ![这里写图片描述](https://upload-images.jianshu.io/upload_images/1233754-eb5b4bc4fbf757be.png!web?imageMogr2/auto-orient/strip%7CimageView2/2/w/550)
 
 复杂的任务被分成细小的任务，并且很容易解决。越小的东西，bug越少，越容易debug，更好测试。在MVP模式下的View层将会变得简单，所以即便是他请求数据的时候也不需要回调函数。View逻辑变成十分直接——通过接口，告诉我你想要的样子，我便是你想要的样子。View和Data不在需要直接关联，不关联就意味着Data和View的重用性变得更高。
@@ -122,7 +123,7 @@ Kiss原则（Keep It Stupid Simple）
 
 项目的结构大致如下
 
-![这里写图片描述](https://img-blog.csdn.net/20180316110446630?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture1/20180316110446630.jpeg)
 
 项目非常简单，只是做了一个模拟登录的业务场景，其中，LoginRepository里面的登录操作替换成实际的登录操作即可实现完整的一套业务逻辑了。
 
@@ -130,11 +131,11 @@ Kiss原则（Keep It Stupid Simple）
 
 ILoginModel
 
-![这里写图片描述](https://img-blog.csdn.net/20180316111121686?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture1/20180316111121686.jpeg)
 
 主要是定义登录的操作接口，以及定义登录结果的回调接口，这个接口是给Presenter用的。实际的登录操作在LoginRepository里面。
 
-![这里写图片描述](https://img-blog.csdn.net/20180316111332909?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture1/20180316111332909.jpeg)
 
 doLogin方法里的部分，模拟了一个假“登录”操作。
 
@@ -142,11 +143,12 @@ doLogin方法里的部分，模拟了一个假“登录”操作。
 **View部分**
 
 ILoginView
-![这里写图片描述](https://img-blog.csdn.net/20180316112923843?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture1/20180316112923843.jpeg)
 
 非常简单，定义了显示dialog、显示登录成功、显示登录失败的几个方法，具体的实现可以是任意一个View（视图）、Fragment、Activity等等等等。我这里用的Activity去实现的View接口
 
-![这里写图片描述](https://img-blog.csdn.net/20180316113724244?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture1/20180316113724244.jpeg)
 
 这里就不用我多说什么了吧，大家再熟悉不过的场景了。这里面处理了实际的dialog的显示，登录成功的显示和登录失败的显示。最重要的是`loginPresenter=new LoginPresenterImpl(this);`这里View就持有了Presenter的引用，可以操作Presenter的相关方法了。
 
@@ -154,11 +156,11 @@ ILoginView
 
 ILoginPresenter
 
-![这里写图片描述](https://img-blog.csdn.net/20180316111625565?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture1/20180316111625565.jpeg)
 
 非常简单，定义登录的接口，但是这个接口是给View操作的。实际的实现在LoginPresenterImpl里面
 
-![这里写图片描述](https://img-blog.csdn.net/20180316111835100?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture1/20180316111835100.jpeg)
 
 这里可以看到，当我们的Presenter构造好之后，他就同时持有了View和Model的引用。View和Model层完全互不可见，但是，从这一刻开始，View却能展示Model层拥有的数据，Model也能根据View的状态变化或指令更新自己的数据！！！！
 想象一下，如果哪一天用户模型User去掉了name字段，要求展示nickName字段，那你需要对你的View做任何改动吗？View是否变得可以复用了？
