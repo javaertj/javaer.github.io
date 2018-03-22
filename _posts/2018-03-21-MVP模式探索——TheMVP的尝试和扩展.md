@@ -8,6 +8,7 @@ catalog: true
 tags:
      - Android
      - MVP
+     - theMVP
      - 设计模式
 ---
 
@@ -61,7 +62,7 @@ MVP模式虽然被大力推广和使用，但是他必然也是有缺点的，�
 
 先看一下我改造过后的theMVP模式的原理图
 
-![这里写图片描述](//img-blog.csdn.net/20180320141401403?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture2/97E4FABB-B41C-4637-8108-2ECAFDBA4E8E.png)
 
 theMVP模式的创造者在他的文章里面提到了这个问题，他页提到了解决方法，使用集合，但是他似乎并没去尝试，或者尝试了，只是太忙了，没时间分享给大家而已。虽然我想给这个模式改个名字，可是还是算了吧，毕竟不属于我的创作，我只是个搬运工而已。所以，后面还是叫他theMVP模式吧。
 
@@ -71,25 +72,26 @@ theMVP模式的创造者在他的文章里面提到了这个问题，他页提�
 
 先看看包结构的变化（请忽略我蹩脚的命名）
 
-![这里写图片描述](//img-blog.csdn.net/2018032014351686?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture2/package_info_image.jpeg)
 
 首先加入了两个注解 ModelBinderRouter、ViewBinderRouter
 
 ModelBinderRouter
 
-![这里写图片描述](//img-blog.csdn.net/20180320143700887?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture2/model_binder_router_image.jpeg)
 
 只是声明Model需要的DataBinder的class，便于在Model变化的时候，Presenter找到对应的DataBinder操作View。
 
 ViewBinderRouter
 
-![这里写图片描述](//img-blog.csdn.net/20180320144018207?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture2/view_binder_router_image.jpeg)
 
 这里声明了Presenter需要包含的Delegate和DataBinder的class，以便于Presenter在合适的时候创建和关联对应的Delegate和DataBinder。
 
 其次，改动最大的Presenter实现类(太长的类只能贴代码，mac上居然没有可以滚动截取AndroidStudio内容的软件)
 
 ActivityPresenter
+
 ```
 public abstract class ActivityPresenter<T extends IDelegate> extends AppCompatActivity {
     protected Map<String, DataBinder> binderMap ;
@@ -181,13 +183,13 @@ FragmentPresenter和ActivityPresenter类似，我Github的demo里有完整代码
 
 Activity-Presenter
 
-![这里写图片描述](//img-blog.csdn.net/20180320162155173?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture2/activity_presenter_image.jpeg)
 
 这个很简单啦，声明注解，构造Model，根据Model改变操作Delegate。
 
 Delegate
 
-![这里写图片描述](//img-blog.csdn.net/20180320162501394?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture2/delegate_image.jpeg)
 
 
 这个就更简单啦，初始化View，定义一些操作View的方法供外部调用等等。
@@ -196,21 +198,21 @@ Delegate
 
 ArticleDataBinder
 
-![这里写图片描述](//img-blog.csdn.net/2018032016274785?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture2/article_data_binder_image.jpeg)
 
 ColorDataBinder
 
-![这里写图片描述](//img-blog.csdn.net/20180320162859482?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture2/color_data_binder_image.jpeg)
 
 两个Model
 
 Article
 
-![这里写图片描述](//img-blog.csdn.net/2018032016301023?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture2/article_model_image.jpeg)
 
 ColorModel
 
-![这里写图片描述](//img-blog.csdn.net/20180320163049678?watermark/2/text/Ly9ibG9nLmNzZG4ubmV0L3lrYjE5ODkxMjMw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+![这里写图片描述](https://ykbjson.github.io/blogimage/mvppicture2/color_model_image.jpeg)
 
 最后实现的效果就是，当Article属性改变，Presenter会找到ArticleDataBinder去操作Delegate，改变显示的长文本内容或者SnackBar的内容；当ColorModel改变的时候，Presenter会找到ColorDataBinder去操作Delegate，改变显示的长文本内容的字体颜色。到这里，算是解决了一个View对应多个Model，Model之间互不关联的需求吧。完整的实现请移步去我的github看代码。
 
