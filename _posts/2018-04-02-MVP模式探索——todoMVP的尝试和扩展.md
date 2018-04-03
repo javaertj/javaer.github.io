@@ -1,3 +1,18 @@
+---
+layout:     post
+title:      MVP模式探索——todoMVP的尝试和扩展
+subtitle:   MVP模式探索3
+date:       2018-04-02
+author:     YANKEBIN
+catalog: true
+tags:
+     - Android
+     - MVP
+     - todoMVP
+     - 设计模式
+---
+
+
 # 前言
 
 构思了一段时间，恰巧今天也有空，就把MVP探索系列的文章暂时画上一个句号吧，当然，知识的海洋是无穷无尽的，学海无涯，在以后的工作中，如果鄙人总结出了一些好的相关的经验或是学习到相关的优秀的知识没我还会回来和大家分享的。
