@@ -494,7 +494,6 @@ BaseView接口，稍微有一点改动，增加了一个获取Context方法（�
 
 '
 
-  
  		 Map<String, Object> map = new HashMap<>();
         create(ILogin.class).doLogin(map)
                 .enqueue(new RCallback<ResponseBean<User>>(token) {
@@ -512,6 +511,7 @@ BaseView接口，稍微有一点改动，增加了一个获取Context方法（�
                         callback.onError(s);
                     }
                 });
+                
 '
 
 
