@@ -719,6 +719,12 @@ View这里就多了一个方法，关于这个方法，稍微给大家解释一�
 
 嗯，暂时我这个笨脑袋能想到的就这么多，如果大家发现了别的什么问题，请不吝赐教，让我可以吃一堑长一智，谢谢。
 
+最后，是项目的Github地址
+
+>[Demo地址](https://github.com/ykbjson/TestStandardMvp/tree/master/TestStandardMvp/mmvpsample)
+
+>[Library地址](https://github.com/ykbjson/TestStandardMvp/tree/master/TestStandardMvp/mmvp)
+
 
 
 
