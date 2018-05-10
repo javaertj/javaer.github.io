@@ -33,7 +33,7 @@ tags:
 
 >[JavaPoet源码](https://github.com/square/javapoet)
 
-# 一、技术实施细节
+#  一、技术实施细节
 
 
 因为替代方案是在原来的代码基础上改的，所以后面的叙述都会以原来的代码为相对参考，所以，如果有什么疑惑的地方，请记得去看我前一篇文章
@@ -45,7 +45,7 @@ tags:
 
 1. 在尝试APT技术的时候，一开始就遇到了一个问题，我们要编写的annotationProcessor是一个Java Library，而我最开始的MMVP moudle是一个Android Library，annotationProcessor需要MMVP moudle里的注解，但是我发现似乎没有办法把一个Android Library作为Java Library的依赖，但是反过来却是可以的，所以我就只好把MMVP moudle里的一些annotationProcessor需要的注解抽离出去，单独建了一个mmvpannotation Java Library，让annotationProcessor moudle和MMVP moudle都依赖mmvpannotation。关于把Android Library作为Java Library的依赖的资料参考
 
->[为Java Library 添加 Android 注解支持](https://www.jianshu.com/p/fa5163c08452)
+	>[为Java Library 添加 Android 注解支持](https://www.jianshu.com/p/fa5163c08452)
 
 
 2. 原来在使用反射方式的的时候，有些类（比如Presenter类）是不需要使用注解来标识的，但是使用APT技术后，只能通过注解来找到目标类生成对应的代理类解析MMVPAction后，再调用目标类的方法或修改其属性，所这里就新增了了一个注解，MMVPActionProcessor，这个注解在mmvpannotation moudle下
