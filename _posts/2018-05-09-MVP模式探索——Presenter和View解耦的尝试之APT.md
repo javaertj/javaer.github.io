@@ -532,14 +532,14 @@ LoginPresenter\_MMVPActionProcessor
 
 如果大家研究过ButterKnife的源码，看到这里，是否有一种似曾相识的感觉?
 
-现在有了LoginPresenter\_MMVPActionProcessor的实例,然后调用其handleAction方法，我们汇过去看看LoginPresenter\_MMVPActionProcessor的handleAction方法，调用了自身的doLogin\_Process方法，然后再看doLogin\_Process方法，是不是调用了LoginPresenter的doLogin方法？你肯定会很好奇，LoginPresenter\_MMVPActionProcessor怎么会这么智能，直接就知道要调用LoginPresenter的doLogin方法，其实它一点都不智能，如果LoginPresenter有N个方法添加了ActionProcess注解，那么LoginPresenter\_MMVPActionProcessor的handleAction方法就会是这个样子
+现在有了LoginPresenter\_MMVPActionProcessor的实例,然后调用其handleAction方法，我们回过去看看LoginPresenter\_MMVPActionProcessor的handleAction方法，调用了自身的doLogin\_Process方法，然后再看doLogin\_Process方法，是不是调用了LoginPresenter的doLogin方法？你肯定会很好奇，LoginPresenter\_MMVPActionProcessor怎么会这么智能，直接就知道要调用LoginPresenter的doLogin方法，其实它一点都不智能，如果LoginPresenter有N个方法添加了ActionProcess注解，那么LoginPresenter\_MMVPActionProcessor的handleAction方法就会是这个样子
 
 	  @Override
 	  public boolean handleAction(@NonNull MMVPAction action) {
 	    return method1(action)||method2(action)||method3(action)||...||methodN(action);
 	  }
 
-所以我在MMVPAnnotationProcessor里有这样一句注释**由于无法预知即将调用的方法，只能把重写的方法全部执行一遍，重写方法里有判断可以避免错误执行,并且只要有某个方法返回了true，后续方法将不再执行。或许这样也不比反射执行的风险小吧**。这就是在我已经快要放弃用APT技术解决反射问题时想到的一个笨办法，虽然解决了我遇到的问题，但是我内心是拒绝这样去实现的。
+所以我在MMVPAnnotationProcessor里有这样一句注释：“**由于无法预知即将调用的方法，只能把重写的方法全部执行一遍，重写方法里有判断可以避免错误执行,并且只要有某个方法返回了true，后续方法将不再执行。或许这样也不比反射执行的风险小吧**”。这就是在我已经快要放弃用APT技术解决反射问题时想到的一个笨办法，虽然解决了我遇到的问题，但是我内心是拒绝这样去实现的。
 
 为什么说无法预知即将调用的方法？因为这些代码都是我主动去生成的，即便我知道这里一定有一个handleAction方法，其参数MMVPAction，但是MMVPAction在我面前他就是一个字符串，我无法得到里面的内容，也就无法根据MMVPAction的action精准匹配要执行的方法。
 
