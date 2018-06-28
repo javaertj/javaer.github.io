@@ -2,7 +2,7 @@
 layout:     post
 title:      RxJava2探索-讲得清道得明的线程切换原理之subscribeOn
 subtitle:   RxJava探索
-date:       2018-06-26
+date:       2018-06-28
 author:     YANKEBIN
 catalog: true
 tags:
