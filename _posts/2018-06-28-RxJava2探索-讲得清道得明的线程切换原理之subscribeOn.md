@@ -243,8 +243,8 @@ ps：***如果你们不想去看，也没关系，随便整个工程，引入RxJ
 #### 3.3.1 Observable创建的过程
 
 我们以上面只调用了一次subscribeOn方法的列子为基础，去掉filter和map操作，简化后如下
-  
-  	 Observable.create((ObservableOnSubscribe<String>) observableEmitter -> {
+
+	Observable.create((ObservableOnSubscribe<String>) observableEmitter -> {
 	            System.out.println("ObservableOnSubscribe.subscribe thread : " + Thread.currentThread().getName());
 	            observableEmitter.onNext("1");
 	            observableEmitter.onComplete();
@@ -268,9 +268,9 @@ ps：***如果你们不想去看，也没关系，随便整个工程，引入RxJ
 	
 	                    @Override
 	                    public void onComplete() {
-	                        System.out.println("onComplete  thread : " + Thread.currentThread().getName());
+	                        System.out.println("onComplete  thread : " + 								Thread.currentThread().getName());
 	                    }
-	                });
+	 });
 
   
 首先，我们先看Observable.create(ObservableOnSubscribe)方法
@@ -310,17 +310,20 @@ ps：***如果你们不想去看，也没关系，随便整个工程，引入RxJ
 
 简化无关代码后，我们只关注
 
-	new ObservableSubscribeOn(this, scheduler)	
+	new ObservableSubscribeOn(this, scheduler)
+	
+		
 这句代码，schedule在这里是我们传递的一个Schedules.io，this的话当然是指的当前对象啦——刚才我们创建的一个Observable。接下来我们继续看
 
-		public final class ObservableSubscribeOn<T> extends AbstractObservableWithUpstream<T, T> {
+	public final class ObservableSubscribeOn<T> extends AbstractObservableWithUpstream<T, T> {
 	    final Scheduler scheduler;
 	
 	    public ObservableSubscribeOn(ObservableSource<T> source, Scheduler scheduler) {
 	        super(source);
 	        this.scheduler = scheduler;
 	    }
-	   }
+	}
+		
 
 ObservableSource,如果还记得我刚才的类图，你应该知道，Observable实现了ObservableSource这个接口的，所以这里的source是指我们刚才创建的那个Observable。这里同时持有了Schedule的引用，这个后面会用到。
 
