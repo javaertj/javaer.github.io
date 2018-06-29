@@ -641,7 +641,7 @@ this.threadWorker就是刚才我们说的IoScheduler.CachedWorkerPool提供给Io
 
 #### 3.4.1 来一段非常非常simple的代码
 
-先定义一个打印类，它内部可以持有一个其他的打印类source，在他的打印方法里,如果source不为空，会开启新线程执行source的打印方法，如果source为空，这不开启新线程执行source的打印方法
+先定义一个打印类，它内部可以持有一个其他的打印类source，在他的打印方法里,如果source不为空，会开启新线程执行source的打印方法，如果source为空，则不开启新线程执行，直接开始打印当前线程名称
 	
 	private static class Printer {
         Printer source;
