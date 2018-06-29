@@ -641,7 +641,7 @@ this.threadWorker就是刚才我们说的IoScheduler.CachedWorkerPool提供给Io
 
 #### 3.4.1 来一段非常非常simple的代码
 
-先定义一个打印类，它内部可以持有一个其他的打印类source，在他的打印方法里会开启新线程执行source的打印方法
+先定义一个打印类，它内部可以持有一个其他的打印类source，在他的打印方法里,如果source不为空，会开启新线程执行source的打印方法，如果source为空，这不开启新线程执行source的打印方法
 	
 	private static class Printer {
         Printer source;
@@ -652,6 +652,10 @@ this.threadWorker就是刚才我们说的IoScheduler.CachedWorkerPool提供给Io
 
         }
         void print() {
+        	if(source==null){
+        		System.out.println(name +"-"+ Thread.currentThread().getName());
+        		return;
+        	}
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -681,14 +685,12 @@ this.threadWorker就是刚才我们说的IoScheduler.CachedWorkerPool提供给Io
 	printer4-Thread-0
 	printer3-Thread-1
 	printer2-Thread-2
-	printer1-Thread-3
+	printer1-Thread-2
 
 
 如果你清楚了这里要表示的这个原理，你可能就已经猜到为什么subscribeOn方法只有第一次指定线程的地方是有效的，我就不用费口舌了，文章到此结束。。。不过，那是不可能的，说好了要再装几分钟的x，怎么可能这么快。产品经理快扶我一把，虽然手断了，但我还要撸代码。
 
-言归正传，这个原理是什么？对于任意一个Printer而言，不管外面包裹了多少层新的线程去调用他的print方法，他的print方法里的执行语句的工作线程永远都是他的print方法里new的那个Thread。那么在这里，对于第一个printer而言，不管你们把我传递了多少层，最后你们调用我的print方法的时候，我print方法里的执行语句的工作线程只能是我new的那个Thread。
-
-类似如下代码
+言归正传，这个原理是什么？对于任意一个Printer而言，不管外面包裹了多少个新的Printer去调用他的print方法，他的print方法里的执行语句的工作线程永远都是他下游的第一个Printer的print方法里new的那个Thread，因为第一个Printer的source为空，print方法里的输出语句就没有在被别的Thread包裹了。类似如下代码
 
 	 new Thread(new Runnable() {
             @Override
@@ -708,7 +710,7 @@ this.threadWorker就是刚才我们说的IoScheduler.CachedWorkerPool提供给Io
         },"thread1").start();
 
 
-Thread.currentThread().getName()的结果永远是thread3。清楚了这一点，我们就可以愉快的继续往下讲了。
+Thread.currentThread().getName()的结果永远是thread3。这里代码执行顺序和RxJava实际的顺序刚好相反，因为RxJava是逆向向上调用的，大家注意区分就好了。总之就是，第一个Printer的print方法的执行线程，只能是被他下游的Printer控制，到了这段代码里，那句输出语句打印出的线程名称，肯定是他外层Thread的名称。的清楚了这一点，我们就可以愉快的继续往下讲了。
 
 #### 3.4.2 Observable多次subscribeOn的流程类比
 
@@ -729,35 +731,36 @@ Thread.currentThread().getName()的结果永远是thread3。清楚了这一点�
  
  
  其次，定义一个Printer类来实现IPrinter接口
- 
- 	private static class Printer implements IPrinter {
+
+	private static class Printer implements IPrinter {
         private IPrinter source;
         private String name;
-        private static volatile AtomicInteger createCount = new AtomicInteger(0);
 
-        Printer(IPrinter source,String name) {
+        Printer(IPrinter source, String name) {
             this.source = source;
-            this.name=name;
+            this.name = name;
         }
 
         @Override
         public void subscribe(IPaper paper) {
-        	  //这个地方非常关键
-            IPaper parent = new Paper(paper);
+            //这个地方非常关键
+            IPaper parent = new Paper(paper, name);
             preparePrint(parent);
         }
 
         @Override
         public void preparePrint(IPaper paper) {
+            System.out.println(name + " preparePrint on " +
+                    Thread.currentThread().getName());
+            if (null == source) {
+                print(paper);
+                return;
+            }
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    System.out.println("Printer-" + name + "-preparePrint-" +
-                            Thread.currentThread().getName());
                     if (null != source) {
                         source.subscribe(paper);
-                    } else {
-                        print(paper);
                     }
                 }
             }).start();
@@ -765,32 +768,31 @@ Thread.currentThread().getName()的结果永远是thread3。清楚了这一点�
 
         @Override
         public void print(IPaper paper) {
-            System.out.println("Printer-" + name + "-startPrint-" +
+            System.out.println(name + " start print work on " +
                     Thread.currentThread().getName());
-            paper.show();
+            paper.show("哈哈哈哈哈");
         }
     }
-    
- 再定义一个Paper类实现IPaper接口
- 
- 	private static class Paper implements IPaper {
-        private IPaper actual;
-        private static volatile AtomicInteger createCount = new AtomicInteger(0);
-        private int mId;
 
-        Paper(IPaper actual) {
+ 再定义一个Paper类实现IPaper接口
+
+	private static class Paper implements IPaper {
+        private IPaper actual;
+       private String printerName;
+
+        Paper(IPaper actual,String printerName) {
+            this.printerName=printerName;
             this.actual = actual;
         }
 
         @Override
-        public void show() {
-            actual.show(content);
-            mId=createCount.incrementAndGet();
-            System.out.println("Paper-" + mId + "-show-" +
+        public void show(String content) {
+            System.out.println( printerName+" print on paper , and work on " +
                     Thread.currentThread().getName());
+            actual.show(content);
         }
-    }     
-
+    }
+	
 最后在main方法调用
 
 	public static void main(String args[]) {
@@ -800,8 +802,9 @@ Thread.currentThread().getName()的结果永远是thread3。清楚了这一点�
         final IPrinter printer4 = new Printer(printer3, "printer4");
         printer4.subscribe(new IPaper() {
             @Override
-            public void show() {
-
+            public void show(String content) {
+                System.out.println(content + " show on " +
+                        Thread.currentThread().getName());
             }
         });
     }
@@ -809,15 +812,16 @@ Thread.currentThread().getName()的结果永远是thread3。清楚了这一点�
 
 输出结果如下
 
-	Printer-printer4-preparePrint-Thread-0
-	Printer-printer3-preparePrint-Thread-1
-	Printer-printer2-preparePrint-Thread-2
-	Printer-printer1-preparePrint-Thread-3
-	Printer-printer1-startPrint-Thread-3
-	Paper-1-show-Thread-3
-	Paper-2-show-Thread-3
-	Paper-3-show-Thread-3
-	Paper-4-show-Thread-3
+	printer4 preparePrint on main//onSubscribe线程-main
+	printer3 preparePrint on Thread-0//printer4 new的
+	printer2 preparePrint on Thread-1//printer3 new的
+	printer1 preparePrint on Thread-2//printer2 new的
+	printer1 start print work on Thread-2
+	printer1 print on paper , and work on Thread-2
+	printer2 print on paper , and work on Thread-2
+	printer3 print on paper , and work on Thread-2
+	printer4 print on paper , and work on Thread-2
+	哈哈哈哈哈 show on Thread-2
 
 代码你们可以直接考出去运行的，看看我有没有说错。subscribeOn之所以只有第一次调用才有效，就是利用的类似这个demo展示的原理。顶层Observer发送数据的线程永远是第一次调用subscribeOn时指定的线程，因为数据的发射流程过程中，我们再也没有去切换过线程了，所以这其实很好理解的吧。
 
