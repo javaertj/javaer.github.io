@@ -23,7 +23,11 @@ tags:
 
 >[demo依赖的unity工程](https://code.aliyun.com/modelingwithunity3d/unity3dballgame.git)
 
->[android端demo和plugin源码工程](https://github.com/ykbjson/Unity3DPlugin)
+
+>[android端demo和plugin源码工程](https://github.com/ykbjson/Unity3DPlugin
+
+
+>ps：demo依赖的unity工程有个文件超过了100M，无法上传到github，所以上传到了code.aliyun.com,没账号的童鞋注册后登录了再点击链接就可以了。
 
 想要快速看到效果？
 
@@ -364,7 +368,7 @@ android调用unity和uinty调用android还是有些不同的。android调用unit
 
 ### 2.1.3 unity端调用android的script的一点封装
 
-上面已经说明了android如何调用unity端，为了unity端也比较容易的调用android端，所以我在unity端也抽象了两个script文件：AndroidCaller、CallInfo
+上面已经说明了android如何调用unity端，为了unity端也比较容易的调用android端，所以我在unity端也封装了两个script文件：AndroidCaller、CallInfo
 
 我们先看看AndroidCaller
 
