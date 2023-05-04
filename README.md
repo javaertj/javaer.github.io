@@ -1,4 +1,4 @@
-# YKB Blog
+# Javaer Blog
 
 > 下面是博客的搭建教程，这个教程修改自 [BY](https://github.com/qiubaiying/qiubaiying.github.io) 。
 > 
